@@ -497,14 +497,17 @@ bool Screen_SetSDLVideoSize(int width, int height, int bitdepth, bool bForceChan
 	/* Set new video mode */
 	DEBUGPRINT(("SDL screen request: %d x %d @ %d (%s)\n", width, height, bitdepth,
 	            bInFullScreen?"fullscreen":"windowed"));
+#ifndef __LIBRETRO__ 
 	sdlscrn = SDL_SetVideoMode(width, height, bitdepth, sdlVideoFlags);
+#else
+	/* FORCE 32 BITDEPTH */
+	sdlscrn = SDL_SetVideoMode(width, height, 32/*bitdepth*/, sdlVideoFlags);
 
-#ifdef __LIBRETRO__ 
-  videoBuffer=(unsigned int *)sdlscrn->pixels;
-printf("SDL screen obtain: %d x %d @ %d (%s)\n", sdlscrn->w, sdlscrn->h, sdlscrn->format->BitsPerPixel, bInFullScreen?"fullscreen":"windowed");
-retrow=sdlscrn->w;
-retroh=sdlscrn->h;
-NEWGAME_FROM_OSD=1;
+	videoBuffer=(unsigned int *)sdlscrn->pixels;
+	printf("SDL screen obtain: %d x %d @ %d (%s)\n", sdlscrn->w, sdlscrn->h, sdlscrn->format->BitsPerPixel, bInFullScreen?"fullscreen":"windowed");
+	retrow=sdlscrn->w;
+	retroh=sdlscrn->h;
+	NEWGAME_FROM_OSD=1;
 #endif 
 
 	/* By default ConfigureParams.Screen.nForceBpp and therefore
