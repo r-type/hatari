@@ -12,6 +12,10 @@
 
 #include <SDL.h>
 
+#ifdef __LIBRETRO__
+extern int gui_poll_events(void);
+#endif
+
 /* object types: */
 enum
 {

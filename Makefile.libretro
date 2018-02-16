@@ -1,0 +1,186 @@
+
+DEBUG = 0
+
+#IPFSUPPORT ?= 0
+IPFDIR ?=
+ 
+ifeq ($(IPFSUPPORT), 1)
+CAPS_DIR = $(IPFDIR)
+ifeq ($(platform), wiiu)
+CAPS_LIB = $(CAPS_DIR)/libcapsimage.a
+else
+CAPS_LIB = -L$(CAPS_DIR) -lcapsimage
+endif
+else
+CAPS_DIR =
+CAPS_LIB =
+endif
+
+ifeq ($(platform),)
+platform = unix
+ifeq ($(shell uname -a),)
+   platform = win
+else ifneq ($(findstring Darwin,$(shell uname -a)),)
+   platform = osx
+else ifneq ($(findstring MINGW,$(shell uname -a)),)
+   platform = win
+endif
+endif
+
+TARGET_NAME := hatarisdl
+
+CP:= cp
+
+ifeq ($(platform), unix)
+	CC = gcc
+	CXX = g++
+	AR = ar
+	CFLAGS = -O2 -Iinclude -D_GNU_SOURCE=1 -Wall -D__LIBRETRO__ -DHAVE_POW -DHAVE_MMAP=0 
+	CXXFLAGS = -g -O2  -fno-merge-constants 
+	TARGET := $(TARGET_NAME)_libretro.so
+	fpic := -fPIC
+#	SHARED := -shared -Wl,--no-undefined -Wl,--version-script=link.T
+	ENDIANNESS_DEFINES := -DLSB_FIRST
+	FLAGS += -D__LINUX__ -D_PATH_MNTTAB=\"/etc/fstab\"
+	EXTRA_LDF =  -fPIC -lm -lpthread -lz -lpng
+	LDFLAGS += -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T 
+	SDL_PREFIX := unix
+# android arm
+else ifneq (,$(findstring android,$(platform)))
+   	TARGET := $(TARGET_NAME)_libretro.so
+   	fpic = -fPIC
+   	SHARED := -lstdc++ -llog -lz -shared -Wl,--version-script=link.T -Wl,--no-undefined
+	CFLAGS +=  -g -O2 
+   	CC = arm-linux-androideabi-gcc
+   	CXX = arm-linux-androideabi-g++
+	AR = arm-linux-androideabi-ar
+# Wii U
+else ifeq ($(platform), wiiu)
+	TARGET := $(TARGET_NAME)_libretro_wiiu.a
+	CC = $(DEVKITPPC)/bin/powerpc-eabi-gcc$(EXE_EXT)
+	CXX = $(DEVKITPPC)/bin/powerpc-eabi-g++$(EXE_EXT)
+	AR = $(DEVKITPPC)/bin/powerpc-eabi-ar$(EXE_EXT)
+	COMMONFLAGS += -DWIIU -mwup -mcpu=750 -meabi -mhard-float -D__POWERPC__ -D__ppc__ -Dpowerpc
+	COMMONFLAGS += -U__INT32_TYPE__ -U __UINT32_TYPE__ -D__INT32_TYPE__=int -DMSB_FIRST -DWORDS_BIGENDIAN=1
+	COMMONFLAGS += -Iwiiu-deps -I$(DEVKITPRO)/portlibs/ppc/include -DMSB_FIRST -DBYTE_ORDER=BIG_ENDIAN 
+	CFLAGS += $(COMMONFLAGS) -O2 -Iinclude -D_GNU_SOURCE=1 -Wall -D__LIBRETRO__ -DHAVE_POW -DHAVE_MMAP=0
+	CXXFLAGS += $(COMMONFLAGS) -g -O2  -fno-merge-constants
+	ENDIANNESS_DEFINES += -DMSB_FIRST
+	SDL_PREFIX := wiiu
+	EXTRA_INCLUDES := -Ideps
+	STATIC_LINKING = 1
+# cross Windows
+else ifeq ($(platform), wincross64)
+	TARGET := $(TARGET_NAME)_libretro.dll
+	AR = x86_64-w64-mingw32-ar
+	CC = x86_64-w64-mingw32-gcc-win32
+	CXX = x86_64-w64-mingw32-g++-win32
+	CFLAGS = -O2 -Iinclude -D_GNU_SOURCE=1 -Wall -D__LIBRETRO__ -DX86_64 -m64 -DLINUX_CONFIG -DWIN_CONFIG
+	ENDIANNESS_DEFINES := -DLSB_FIRST
+	FLAGS +=
+	EXTRA_LDF := -m64 -lmingw32 -lws2_32 -lwinmm -lole32 -mwindows -Wl,--export-all-symbols -lpng -lz
+	SDL_PREFIX := win64
+	LDFLAGS += -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T 
+else ifeq ($(platform), wincross64ex)
+	TARGET := libSDL2_win64.a
+	AR = /vm/mingw64-w32/bin/ar.exe
+	CC = /vm/mingw64-w32/bin/x86_64-w64-mingw32-gcc.exe
+	CXX = /vm/mingw64-w32/bin/x86_64-w64-mingw32-g++.exe
+	CFLAGS = -O2 -Iinclude -D_GNU_SOURCE=1 -Wall -D__LIBRETRO__
+ 	CFLAGS+=-DX86_64 -m64
+	LDFLAGS+=-m64
+	LDFLAGS += -static-libgcc -static-libstdc++ 
+	ENDIANNESS_DEFINES := -DLSB_FIRST
+	FLAGS +=
+	EXTRA_LDF := -lwinmm -lole32 -Wl,--export-all-symbols
+	SDL_PREFIX := win64
+else ifeq ($(platform), wincross32)
+	TARGET := libSDL2_win32.a
+	AR =  i686-w64-mingw32-ar
+	CC =  i686-w64-mingw32-gcc-win32
+	CXX =  i686-w64-mingw32-g++-win32
+	CFLAGS = -O2 -Iinclude -D_GNU_SOURCE=1 -Wall -D__LIBRETRO__ -DX86_32 -m32
+	ENDIANNESS_DEFINES := -DLSB_FIRST
+	FLAGS +=
+	EXTRA_LDF := -m32 -lmingw32 -lws2_32 -lwinmm -lole32 -mwindows -Wl,--export-all-symbols
+	SDL_PREFIX := win32
+else
+   	TARGET :=  libSDL_win.a
+   	CC = gcc
+   	CXX = g++
+	AR = ar
+	CFLAGS = -O2 -Iinclude -D_GNU_SOURCE=1 -Wall -D__LIBRETRO__
+   	LDFLAGS += -static-libgcc -static-libstdc++ 
+   	ENDIANNESS_DEFINES := -DLSB_FIRST
+   	FLAGS +=
+	EXTRA_LDF = -lwinmm -Wl,--export-all-symbols
+	SDL_PREFIX := win32
+endif
+
+MD = mkdir
+ARFLAGS = -cr
+CORE_DIR = .
+
+include Makefile.common
+
+OBJECTS = $(COBJS) $(CORE_DIR)/libretro/libretro.o
+
+ifeq ($(DEBUG), 0)
+   FLAGS += -O3 -DNDEBUG 
+else
+   FLAGS += -O0 -g
+endif
+
+# -DHAVE_CONFIG_H
+
+LDFLAGS +=  $(fpic) $(SHARED) $(EXTRA_LDF) 
+FLAGS += -I. -I./libretro/sdl-libretro/include -I./libretro -DHAVE_LIBCO=1 -DUSE_ZLIB
+FLAGS += -Isrc/includes -Isrc/debug -Isrc/falcon -Isrc/cpu -I./libretro/cpugen -Isrc -Isrc/gui-sdl
+
+ifeq ($(platform), unix)
+FLAGS +=  -Ilibretro/capsimg_linux/include -Ilibretro/capsimg_linux/
+FLAGS +=  -DHAVE_CAPSIMAGE=1 -Ilibretro/capsimg_linux/LibIPF -I./libretro/capsimg_linux/Codec -I./libretro/capsimg_linux/Core 
+FLAGS +=  -I./libretro/capsimg_linux/Device -Ilibretro/capsimg_linux/CAPSImg
+endif
+
+ifeq ($(platform), wiiu)
+FLAGS +=  -I./sdl-libretro/wiiu-deps
+FLAGS +=  -Ilibretro/capsimg_linux/include -Ilibretro/capsimg_linux/
+FLAGS +=  -DHAVE_CAPSIMAGE=1 -Ilibretro/capsimg_linux/LibIPF -I./libretro/capsimg_linux/Codec -I./libretro/capsimg_linux/Core 
+FLAGS +=  -I./libretro/capsimg_linux/Device -Ilibretro/capsimg_linux/CAPSImg
+else
+FLAGS += -DCONFDIR=\"./\"
+endif
+
+WARNINGS :=  
+	
+FLAGS += -D__LIBRETRO__ $(ENDIANNESS_DEFINES) $(WARNINGS) $(fpic) 
+
+ifeq ($(IPFSUPPORT), 1)
+FLAGS += -I$(CAPS_DIR)/include
+FLAGS += -DHAVE_CAPSIMAGE=1
+endif
+
+CXXFLAGS += $(FLAGS)  -std=c++11  -fpermissive
+CFLAGS += $(FLAGS) 
+
+
+all:  $(TARGET) 
+
+$(TARGET): $(OBJECTS) 
+ifeq ($(STATIC_LINKING),1)
+	$(AR) -cr $(TARGET) $(OBJECTS) 
+else
+	$(CC) -o $@ $(OBJECTS) $(LDFLAGS) $(CAPS_LIB)
+endif
+
+%.o: %.cpp
+	$(CXX) -c -o $@ $< $(CXXFLAGS)
+
+%.o: %.c
+	$(CC) -c -o $@ $< $(CFLAGS)
+
+clean:
+	rm -f $(TARGET) $(OBJECTS) 
+
+.PHONY: clean

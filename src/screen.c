@@ -47,6 +47,11 @@ const char Screen_fileid[] = "Hatari screen.c : " __DATE__ " " __TIME__;
 #include "video.h"
 #include "falcon/videl.h"
 
+#ifdef __LIBRETRO__ 
+extern uint32_t *videoBuffer;
+extern int NEWGAME_FROM_OSD,retrow,retroh;
+#endif 
+
 #define DEBUG 0
 
 #if DEBUG
@@ -493,6 +498,14 @@ bool Screen_SetSDLVideoSize(int width, int height, int bitdepth, bool bForceChan
 	DEBUGPRINT(("SDL screen request: %d x %d @ %d (%s)\n", width, height, bitdepth,
 	            bInFullScreen?"fullscreen":"windowed"));
 	sdlscrn = SDL_SetVideoMode(width, height, bitdepth, sdlVideoFlags);
+
+#ifdef __LIBRETRO__ 
+  videoBuffer=(unsigned int *)sdlscrn->pixels;
+printf("SDL screen obtain: %d x %d @ %d (%s)\n", sdlscrn->w, sdlscrn->h, sdlscrn->format->BitsPerPixel, bInFullScreen?"fullscreen":"windowed");
+retrow=sdlscrn->w;
+retroh=sdlscrn->h;
+NEWGAME_FROM_OSD=1;
+#endif 
 
 	/* By default ConfigureParams.Screen.nForceBpp and therefore
 	 * BitCount is zero which means "SDL color depth autodetection".
@@ -1232,6 +1245,7 @@ static void Screen_Blit(SDL_Rect *sbar_rect)
 	else
 # endif
 #endif
+#ifndef __LIBRETRO__
 	{
 		int count = 1;
 		SDL_Rect rects[2];
@@ -1243,7 +1257,7 @@ static void Screen_Blit(SDL_Rect *sbar_rect)
 		}
 		SDL_UpdateRects(sdlscrn, count, rects);
 	}
-
+#endif
 	/* Swap copy/raster buffers in screen. */
 	pTmpScreen = pFrameBuffer->pSTScreenCopy;
 	pFrameBuffer->pSTScreenCopy = pFrameBuffer->pSTScreen;
@@ -1514,13 +1528,14 @@ void Screen_GenConvUpdate(SDL_Rect *extra, bool forced)
 
 	if (!forced && !genconv_do_update) // the HW surface is available
 		return;
-
+#ifndef __LIBRETRO__
 	rects[0] = STScreenRect;
 	if (extra) {
 		rects[1] = *extra;
 		count = 2;
 	}
 	SDL_UpdateRects(sdlscrn, count, rects);
+#endif
 }
 
 Uint32 Screen_GetGenConvWidth(void)

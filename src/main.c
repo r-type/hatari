@@ -68,6 +68,19 @@ const char Main_fileid[] = "Hatari main.c : " __DATE__ " " __TIME__;
 #include "gui-win/opencon.h"
 #endif
 
+#ifdef __LIBRETRO__
+#define LIBCO_C 
+#include "libco/libco.h"
+extern cothread_t mainThread;
+extern cothread_t emuThread;
+extern int pauseg;
+extern int LoadTosFromRetroSystemDir();
+extern void retro_shutdown_hatari(void);
+#if defined(WIIU)
+#define CONFDIR "sd:/retroarch/cores/system"
+#endif
+#endif
+
 bool bQuitProgram = false;                /* Flag to quit program cleanly */
 static int nQuitValue;                    /* exit value */
 
@@ -301,6 +314,13 @@ void Main_WaitOnVbl(void)
 	Sint64 FrameDuration_micro;
 	Sint64 nDelay;
 
+#ifdef __LIBRETRO__
+co_switch(mainThread);
+#ifdef WIIU
+return;
+#endif
+#endif
+
 	nVBLCount++;
 	if (nRunVBLs &&	nVBLCount >= nRunVBLs)
 	{
@@ -488,6 +508,10 @@ void Main_EventHandler(void)
 	SDL_Event event;
 	int events;
 	int remotepause;
+
+#ifdef __LIBRETRO__
+	if(pauseg==-1)Main_RequestQuit(0);
+#endif	
 
 	do
 	{
@@ -747,15 +771,24 @@ static void Main_Init(void)
 
 	if (Reset_Cold())             /* Reset all systems, load TOS image */
 	{
+#ifdef __LIBRETRO__
+		if(LoadTosFromRetroSystemDir()){
+			Dialog_DoProperty();
+		}
+#else
 		/* If loading of the TOS failed, we bring up the GUI to let the
 		 * user choose another TOS ROM file. */
 		Dialog_DoProperty();
+#endif
 	}
 	if (!bTosImageLoaded || bQuitProgram)
 	{
 		if (!bTosImageLoaded)
 			fprintf(stderr, "Failed to load TOS image!\n");
 		SDL_Quit();
+#ifdef __LIBRETRO__
+retro_shutdown_hatari();
+#endif 
 		exit(-2);
 	}
 
@@ -865,7 +898,11 @@ static void Main_StatusbarSetup(void)
  * 
  * Note: 'argv' cannot be declared const, MinGW would then fail to link.
  */
+#ifdef __LIBRETRO__
+int hmain(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
 	/* Generate random seed */
 	srand(time(NULL));

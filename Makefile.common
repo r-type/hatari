@@ -1,0 +1,282 @@
+SDLOBJ = $(CORE_DIR)/libretro
+
+SDLOBJS := \
+	$(SDLOBJ)/sdl-libretro/src/SDL_error.o $(SDLOBJ)/sdl-libretro/src/SDL_fatal.o \
+	$(SDLOBJ)/sdl-libretro/src/SDL.o $(SDLOBJ)/sdl-libretro/src/audio/SDL_wave.o \
+	$(SDLOBJ)/sdl-libretro/src/audio/SDL_audiodev.o $(SDLOBJ)/sdl-libretro/src/audio/SDL_mixer_MMX.o \
+	$(SDLOBJ)/sdl-libretro/src/audio/SDL_mixer_m68k.o $(SDLOBJ)/sdl-libretro/src/audio/SDL_audiocvt.o \
+	$(SDLOBJ)/sdl-libretro/src/audio/SDL_audio.o $(SDLOBJ)/sdl-libretro/src/audio/SDL_mixer.o \
+	$(SDLOBJ)/sdl-libretro/src/audio/SDL_mixer_MMX_VC.o $(SDLOBJ)/sdl-libretro/src/cdrom/SDL_cdrom.o \
+	$(SDLOBJ)/sdl-libretro/src/cpuinfo/SDL_cpuinfo.o $(SDLOBJ)/sdl-libretro/src/events/SDL_active.o \
+	$(SDLOBJ)/sdl-libretro/src/events/SDL_quit.o $(SDLOBJ)/sdl-libretro/src/events/SDL_mouse.o \
+	$(SDLOBJ)/sdl-libretro/src/events/SDL_events.o $(SDLOBJ)/sdl-libretro/src/events/SDL_keyboard.o \
+	$(SDLOBJ)/sdl-libretro/src/events/SDL_expose.o $(SDLOBJ)/sdl-libretro/src/events/SDL_resize.o \
+	$(SDLOBJ)/sdl-libretro/src/file/SDL_rwops.o $(SDLOBJ)/sdl-libretro/src/stdlib/SDL_string.o \
+	$(SDLOBJ)/sdl-libretro/src/stdlib/SDL_malloc.o $(SDLOBJ)/sdl-libretro/src/stdlib/SDL_iconv.o \
+	$(SDLOBJ)/sdl-libretro/src/stdlib/SDL_getenv.o $(SDLOBJ)/sdl-libretro/src/stdlib/SDL_qsort.o \
+	$(SDLOBJ)/sdl-libretro/src/stdlib/SDL_stdlib.o $(SDLOBJ)/sdl-libretro/src/thread/SDL_thread.o \
+	$(SDLOBJ)/sdl-libretro/src/timer/SDL_timer.o $(SDLOBJ)/sdl-libretro/src/video/SDL_cursor.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_blit_0.o $(SDLOBJ)/sdl-libretro/src/video/SDL_yuv.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_bmp.o $(SDLOBJ)/sdl-libretro/src/video/SDL_video.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_yuv_mmx.o $(SDLOBJ)/sdl-libretro/src/video/SDL_surface.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_pixels.o $(SDLOBJ)/sdl-libretro/src/video/SDL_stretch.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_blit_A.o $(SDLOBJ)/sdl-libretro/src/video/SDL_blit_N.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_blit_1.o $(SDLOBJ)/sdl-libretro/src/video/SDL_blit.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_yuv_sw.o $(SDLOBJ)/sdl-libretro/src/video/SDL_RLEaccel.o \
+	$(SDLOBJ)/sdl-libretro/src/video/SDL_gamma.o $(SDLOBJ)/sdl-libretro/src/joystick/SDL_joystick.o \
+	$(SDLOBJ)/sdl-libretro/src/video/libretro/SDL_LIBRETROmouse.o \
+	$(SDLOBJ)/sdl-libretro/src/video/libretro/SDL_LIBRETROevents.o \
+	$(SDLOBJ)/sdl-libretro/src/video/libretro/SDL_LIBRETROvideo.o \
+	$(SDLOBJ)/sdl-libretro/src/video/libretro/SDL_LIBRETROkeyboard.o $(SDLOBJ)/sdl-libretro/src/joystick/libretro/SDL_sysjoystick.o \
+	$(SDLOBJ)/sdl-libretro/src/audio/libretro/SDL_LIBRETROaudio.o \
+	$(SDLOBJ)/sdl-libretro/src/loadso/dummy/SDL_sysloadso.o 
+
+ifeq ($(platform), unix)
+SDLOBJS += $(SDLOBJ)/sdl-libretro/src/cdrom/linux/SDL_syscdrom.o \
+$(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_syscond.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_syssem.o $(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_sysmutex.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_systhread.o  \
+	$(SDLOBJ)/sdl-libretro/src/timer/libretro/SDL_systimer.o 
+endif
+
+ifeq ($(platform), win)
+SDLOBJS += $(SDLOBJ)/sdl-libretro/src/cdrom/win32/SDL_syscdrom.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/generic/SDL_syscond.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/win32/SDL_syssem.o $(SDLOBJ)/sdl-libretro/src/thread/win32/SDL_sysmutex.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/win32/SDL_systhread.o \
+	$(SDLOBJ)/sdl-libretro/src/timer/win32/SDL_systimer.o 
+endif
+
+
+ifeq ($(platform), wincross64)
+SDLOBJS += $(SDLOBJ)/sdl-libretro/src/cdrom/win32/SDL_syscdrom.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/generic/SDL_syscond.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/win32/SDL_syssem.o $(SDLOBJ)/sdl-libretro/src/thread/win32/SDL_sysmutex.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/win32/SDL_systhread.o \
+	$(SDLOBJ)/sdl-libretro/src/timer/win32/SDL_systimer.o 
+endif
+
+ifeq ($(platform), wiiu)
+SDLOBJS += $(SDLOBJ)/sdl-libretro/src/cdrom/dummy/SDL_syscdrom.o\
+	$(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_syscond.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_syssem.o $(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_sysmutex.o \
+	$(SDLOBJ)/sdl-libretro/src/thread/pthread/SDL_systhread.o   \
+	$(SDLOBJ)/sdl-libretro/src/timer/libretro/SDL_systimer.o 
+endif
+
+ifeq ($(platform), wiiu)
+CAPS_OBJS =  \
+$(CORE_DIR)/libretro/capsimg_linux/Codec/CTRawCodec.o \
+$(CORE_DIR)/libretro/capsimg_linux/Codec/CTRawCodecDecompressor.o \
+$(CORE_DIR)/libretro/capsimg_linux/Codec/DiskEncoding.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/BaseFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/BitBuffer.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/CRC.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/DiskFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/MemoryFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsAPI.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsFDCEmulator.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsFormatMFM.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsImage.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsImageStd.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsLoader.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/DiskImage.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/DiskImageFactory.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/stdafx.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/StreamCueImage.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/StreamImage.o
+endif
+
+ifeq ($(platform), unix)
+CAPS_OBJS =  \
+$(CORE_DIR)/libretro/capsimg_linux/Codec/CTRawCodec.o \
+$(CORE_DIR)/libretro/capsimg_linux/Codec/CTRawCodecDecompressor.o \
+$(CORE_DIR)/libretro/capsimg_linux/Codec/DiskEncoding.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/BaseFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/BitBuffer.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/CRC.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/DiskFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/Core/MemoryFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsAPI.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsFDCEmulator.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsFile.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsFormatMFM.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsImage.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsImageStd.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/CapsLoader.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/DiskImage.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/DiskImageFactory.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/stdafx.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/StreamCueImage.o \
+$(CORE_DIR)/libretro/capsimg_linux/CAPSImg/StreamImage.o
+endif
+
+FLOPPY_OBJS = \
+$(CORE_DIR)/src/createBlankImage.o \
+$(CORE_DIR)/src/dim.o \
+$(CORE_DIR)/src/msa.o \
+$(CORE_DIR)/src/zip.o \
+$(CORE_DIR)/src/st.o 
+
+HATARI_OBJS = \
+$(CORE_DIR)/src/scandir.o \
+$(CORE_DIR)/src/dialog.o \
+$(CORE_DIR)/src/midi.o \
+$(CORE_DIR)/src/screen.o \
+$(CORE_DIR)/src/keymap.o \
+$(CORE_DIR)/src/utils.o \
+$(CORE_DIR)/src/configuration.o \
+$(CORE_DIR)/src/options.o \
+$(CORE_DIR)/src/sound.o \
+$(CORE_DIR)/src/file.o \
+$(CORE_DIR)/src/hd6301_cpu.o \
+$(CORE_DIR)/src/main.o \
+$(CORE_DIR)/src/blitter.o \
+$(CORE_DIR)/src/audio.o \
+$(CORE_DIR)/src/cart.o \
+$(CORE_DIR)/src/avi_record.o \
+$(CORE_DIR)/src/bios.o \
+$(CORE_DIR)/src/floppy_stx.o \
+$(CORE_DIR)/src/clocks_timings.o \
+$(CORE_DIR)/src/ioMemTabTT.o \
+$(CORE_DIR)/src/cycles.o \
+$(CORE_DIR)/src/paths.o \
+$(CORE_DIR)/src/vdi.o \
+$(CORE_DIR)/src/unzip.o \
+$(CORE_DIR)/src/psg.o \
+$(CORE_DIR)/src/printer.o \
+$(CORE_DIR)/src/ymFormat.o \
+$(CORE_DIR)/src/spec512.o \
+$(CORE_DIR)/src/screenConvert.o \
+$(CORE_DIR)/src/inffile.o \
+$(CORE_DIR)/src/video.o \
+$(CORE_DIR)/src/cycInt.o \
+$(CORE_DIR)/src/resolution.o \
+$(CORE_DIR)/src/xbios.o \
+$(CORE_DIR)/src/ide.o \
+$(CORE_DIR)/src/nf_scsidrv.o \
+$(CORE_DIR)/src/fdc.o \
+$(CORE_DIR)/src/joy.o \
+$(CORE_DIR)/src/ioMemTabFalcon.o \
+$(CORE_DIR)/src/statusbar.o \
+$(CORE_DIR)/src/mfp.o \
+$(CORE_DIR)/src/acia.o \
+$(CORE_DIR)/src/ioMemTabSTE.o \
+$(CORE_DIR)/src/ikbd.o \
+$(CORE_DIR)/src/str.o \
+$(CORE_DIR)/src/memorySnapShot.o \
+$(CORE_DIR)/src/floppy.o \
+$(CORE_DIR)/src/gemdos.o \
+$(CORE_DIR)/src/hdc.o \
+$(CORE_DIR)/src/stMemory.o \
+$(CORE_DIR)/src/shortcut.o \
+$(CORE_DIR)/src/reset.o \
+$(CORE_DIR)/src/dmaSnd.o \
+$(CORE_DIR)/src/tos.o \
+$(CORE_DIR)/src/floppy_ipf.o \
+$(CORE_DIR)/src/cfgopts.o \
+$(CORE_DIR)/src/ioMem.o \
+$(CORE_DIR)/src/screenSnapShot.o \
+$(CORE_DIR)/src/ioMemTabST.o \
+$(CORE_DIR)/src/wavFormat.o \
+$(CORE_DIR)/src/rs232.o \
+$(CORE_DIR)/src/m68000.o \
+$(CORE_DIR)/src/control.o \
+$(CORE_DIR)/src/change.o \
+$(CORE_DIR)/src/rtc.o 
+
+CPU_OBJS = \
+$(CORE_DIR)/libretro/cpugen/cpuemu_35.o \
+$(CORE_DIR)/src/cpu/debug.o \
+$(CORE_DIR)/src/cpu/events.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_22.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_0.o \
+$(CORE_DIR)/src/cpu/readcpu.o \
+$(CORE_DIR)/src/cpu/fpp_softfloat.o \
+$(CORE_DIR)/src/cpu/newcpu_common.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_13.o \
+$(CORE_DIR)/libretro/cpugen/cpudefs.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_23.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_20.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_32.o \
+$(CORE_DIR)/src/cpu/hatari-glue.o \
+$(CORE_DIR)/src/cpu/writelog.o \
+$(CORE_DIR)/src/cpu/cpummu030.o \
+$(CORE_DIR)/src/cpu/newcpu.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_24.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_33.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_21.o \
+$(CORE_DIR)/src/cpu/memory.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_50.o \
+$(CORE_DIR)/src/cpu/custom.o \
+$(CORE_DIR)/libretro/cpugen/cpustbl.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_34.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_31.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_11.o \
+$(CORE_DIR)/libretro/cpugen/cpuemu_40.o \
+$(CORE_DIR)/src/cpu/fpp.o \
+$(CORE_DIR)/src/cpu/fpp_native.o \
+$(CORE_DIR)/src/cpu/cpummu.o \
+$(CORE_DIR)/src/cpu/softfloat/softfloat.o \
+$(CORE_DIR)/src/cpu/softfloat/softfloat_decimal.o \
+$(CORE_DIR)/src/cpu/softfloat/softfloat_fpsp.o 
+
+DEBUG_OBJS = \
+$(CORE_DIR)/src/debug/natfeats.o \
+$(CORE_DIR)/src/debug/symbols.o \
+$(CORE_DIR)/src/debug/debugui.o \
+$(CORE_DIR)/src/debug/vars.o \
+$(CORE_DIR)/src/debug/debugcpu.o \
+$(CORE_DIR)/src/debug/profiledsp.o \
+$(CORE_DIR)/src/debug/log.o \
+$(CORE_DIR)/src/debug/console.o \
+$(CORE_DIR)/src/debug/history.o \
+$(CORE_DIR)/src/debug/debugInfo.o \
+$(CORE_DIR)/src/debug/68kDisass.o \
+$(CORE_DIR)/src/debug/profile.o \
+$(CORE_DIR)/src/debug/profilecpu.o \
+$(CORE_DIR)/src/debug/evaluate.o \
+$(CORE_DIR)/src/debug/debugdsp.o \
+$(CORE_DIR)/src/debug/breakcond.o 
+
+FALCON_OBJS = \
+$(CORE_DIR)/src/falcon/crossbar.o \
+$(CORE_DIR)/src/falcon/nvram.o \
+$(CORE_DIR)/src/falcon/microphone.o \
+$(CORE_DIR)/src/falcon/dsp_cpu.o \
+$(CORE_DIR)/src/falcon/dsp.o \
+$(CORE_DIR)/src/falcon/dsp_core.o \
+$(CORE_DIR)/src/falcon/videl.o \
+$(CORE_DIR)/src/falcon/dsp_disasm.o 
+
+GUI_OBJS = \
+$(CORE_DIR)/src/gui-sdl/dlgAlert.o \
+$(CORE_DIR)/src/gui-sdl/dlgHalt.o \
+$(CORE_DIR)/src/gui-sdl/dlgHardDisk.o \
+$(CORE_DIR)/src/gui-sdl/dlgMemory.o \
+$(CORE_DIR)/src/gui-sdl/dlgDevice.o \
+$(CORE_DIR)/libretro/gui/dlgFileSelect.o \
+$(CORE_DIR)/src/gui-sdl/dlgScreen.o \
+$(CORE_DIR)/src/gui-sdl/dlgAbout.o \
+$(CORE_DIR)/src/gui-sdl/dlgCpu.o \
+$(CORE_DIR)/src/gui-sdl/dlgSystem.o \
+$(CORE_DIR)/src/gui-sdl/dlgFloppy.o \
+$(CORE_DIR)/src/gui-sdl/dlgNewDisk.o \
+$(CORE_DIR)/src/gui-sdl/dlgJoystick.o \
+$(CORE_DIR)/src/gui-sdl/dlgRom.o \
+$(CORE_DIR)/src/gui-sdl/dlgKeyboard.o \
+$(CORE_DIR)/libretro/gui/dlgMain.o \
+$(CORE_DIR)/src/gui-sdl/dlgSound.o \
+$(CORE_DIR)/libretro/gui/sdlgui.o 
+
+COBJS = $(FLOPPY_OBJS) $(HATARI_OBJS) $(CPU_OBJS) $(DEBUG_OBJS) $(FALCON_OBJS) $(GUI_OBJS) $(SDLOBJS) 
+
+ifeq ($(platform), wiiu)
+COBJS += $(CAPS_OBJS)
+endif
+
+ifeq ($(platform), unix)
+COBJS += $(CAPS_OBJS)
+endif
+

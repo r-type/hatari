@@ -2008,6 +2008,9 @@ void Sound_Update(bool FillFrame)
 		WAVFormat_Update(MixBuffer, OldSndBufIdx, SamplesToGenerate);
 }
 
+#ifdef __LIBRETRO__
+extern void Audio_CallBack(int len);
+#endif
 
 /*-----------------------------------------------------------------------*/
 /**
@@ -2023,6 +2026,9 @@ void Sound_Update_VBL(void)
 	Sound_Update(true);					/* generate as many samples as needed to fill this VBL */
 //fprintf ( stderr , "vbl done %d %d\n" , SamplesPerFrame , CurrentSamplesNb );
 
+#ifdef __LIBRETRO__
+	Audio_CallBack(CurrentSamplesNb*4);
+#endif
 	CurrentSamplesNb = 0;					/* VBL is complete, reset counter for next VBL */
 
 	/*Compute a fractional equivalent of SamplesPerFrame for the next VBL, to avoid rounding propagation */

@@ -30,17 +30,26 @@ int CompleteSndBufIdx;				/* Replay-index into MixBuffer */
 int SdlAudioBufferSize = 0;			/* in ms (0 = use default) */
 int pulse_swallowing_count = 0;			/* Sound disciplined emulation rate controlled by  */
 						/*  window comparator and pulse swallowing counter */
-
+#ifdef __LIBRETRO__
+extern short signed int SNDBUF[1024*2];
+extern void retro_audiocb(signed short int *sound_buffer,int sndbufsize);
+void Audio_CallBack(int len)
+#else
 /*-----------------------------------------------------------------------*/
 /**
  * SDL audio callback function - copy emulation sound to audio system.
  */
 static void Audio_CallBack(void *userdata, Uint8 *stream, int len)
+#endif
 {
 	Sint16 *pBuffer;
 	int i, window, nSamplesPerFrame;
-
+#ifdef __LIBRETRO__
+	memset(SNDBUF,0,1024*4);
+	pBuffer = (Sint16 *)&SNDBUF[0];
+#else
 	pBuffer = (Sint16 *)stream;
+#endif
 	len = len / 4;  // Use length in samples (16 bit stereo), not in bytes
 
 	/* Adjust emulation rate within +/- 0.58% (10 cents) occasionally,
@@ -104,6 +113,9 @@ static void Audio_CallBack(void *userdata, Uint8 *stream, int len)
 	}
 
 	CompleteSndBufIdx = CompleteSndBufIdx % MIXBUFFER_SIZE;
+#ifdef __LIBRETRO__
+	retro_audiocb(SNDBUF,len);
+#endif
 }
 
 
@@ -114,6 +126,7 @@ static void Audio_CallBack(void *userdata, Uint8 *stream, int len)
  */
 void Audio_Init(void)
 {
+#ifndef __LIBRETRO__
 	SDL_AudioSpec desiredAudioSpec;    /* We fill in the desired SDL audio options here */
 
 	/* Is enabled? */
@@ -181,7 +194,7 @@ void Audio_Init(void)
 	{
 		fprintf(stderr, "Warning: Soundbuffer size is too big!\n");
 	}
-
+#endif
 	/* All OK */
 	bSoundWorking = true;
 	/* And begin */
@@ -199,9 +212,9 @@ void Audio_UnInit(void)
 	{
 		/* Stop */
 		Audio_EnableAudio(false);
-
+#ifndef __LIBRETRO__
 		SDL_CloseAudio();
-
+#endif
 		bSoundWorking = false;
 	}
 }
@@ -213,7 +226,9 @@ void Audio_UnInit(void)
  */
 void Audio_Lock(void)
 {
+#ifndef __LIBRETRO__
 	SDL_LockAudio();
+#endif
 }
 
 
@@ -223,7 +238,9 @@ void Audio_Lock(void)
  */
 void Audio_Unlock(void)
 {
+#ifndef __LIBRETRO__
 	SDL_UnlockAudio();
+#endif
 }
 
 
@@ -277,14 +294,18 @@ void Audio_EnableAudio(bool bEnable)
 {
 	if (bEnable && !bPlayingBuffer)
 	{
+#ifndef __LIBRETRO__
 		/* Start playing */
 		SDL_PauseAudio(false);
+#endif
 		bPlayingBuffer = true;
 	}
 	else if (!bEnable && bPlayingBuffer)
 	{
+#ifndef __LIBRETRO__
 		/* Stop from playing */
 		SDL_PauseAudio(true);
+#endif
 		bPlayingBuffer = false;
 	}
 }
